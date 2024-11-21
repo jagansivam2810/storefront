@@ -25,12 +25,10 @@ RUN corepack enable
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Set environment variables for the build
+# Hard-code environment variables for the build
 ENV NEXT_OUTPUT=standalone
-ARG NEXT_PUBLIC_SALEOR_API_URL
-ENV NEXT_PUBLIC_SALEOR_API_URL=${NEXT_PUBLIC_SALEOR_API_URL:-https://api.r1prostore.com/graphql/}
-ARG NEXT_PUBLIC_STOREFRONT_URL
-ENV NEXT_PUBLIC_STOREFRONT_URL=${NEXT_PUBLIC_STOREFRONT_URL:-https://r1prostore.com}
+ENV NEXT_PUBLIC_SALEOR_API_URL=https://api.r1prostore.com/graphql/
+ENV NEXT_PUBLIC_STOREFRONT_URL=https://r1prostore.com
 
 # Run the build command
 RUN pnpm build
