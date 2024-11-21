@@ -8,9 +8,8 @@ RUN corepack enable
 WORKDIR /app
 
 # Get PNPM version from package.json
-RUN export PNPM_VERSION=$(cat package.json | jq '.engines.pnpm' | sed -E 's/[^0-9.]//g')
-
 COPY package.json pnpm-lock.yaml ./
+RUN corepack prepare pnpm@$(jq -r '.engines.pnpm' < package.json) --activate
 
 # Install dependencies using pnpm
 RUN pnpm i --frozen-lockfile --prefer-offline
@@ -22,18 +21,16 @@ WORKDIR /app
 # Enable Corepack in the builder stage as well
 RUN corepack enable
 
-# Install pnpm explicitly if it's not available
-RUN corepack prepare pnpm@$PNPM_VERSION --activate
-
+# Copy dependencies and source code
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Set environment variables for the build
 ENV NEXT_OUTPUT=standalone
 ARG NEXT_PUBLIC_SALEOR_API_URL
-ENV NEXT_PUBLIC_SALEOR_API_URL=${NEXT_PUBLIC_SALEOR_API_URL}
+ENV NEXT_PUBLIC_SALEOR_API_URL=${NEXT_PUBLIC_SALEOR_API_URL:-https://api.r1prostore.com}
 ARG NEXT_PUBLIC_STOREFRONT_URL
-ENV NEXT_PUBLIC_STOREFRONT_URL=${NEXT_PUBLIC_STOREFRONT_URL}
+ENV NEXT_PUBLIC_STOREFRONT_URL=${NEXT_PUBLIC_STOREFRONT_URL:-https://r1prostore.com}
 
 # Run the build command
 RUN pnpm build
